@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="bi bi-speedometer2"></i> Dashboard</h4>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title opacity-75">Total Assets</h6>
+                        <h2 class="mb-0 fw-bold">{{ total_assets }}</h2>
+                    </div>
+                    <i class="bi bi-boxes fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title opacity-75">Active Assets</h6>
+                        <h2 class="mb-0 fw-bold">{{ active_assets }}</h2>
+                    </div>
+                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title opacity-75">Maintenance Due</h6>
+                        <h2 class="mb-0 fw-bold">{{ maintenance_due }}</h2>
+                    </div>
+                    <i class="bi bi-tools fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title opacity-75">Assigned Assets</h6>
+                        <h2 class="mb-0 fw-bold">{{ assigned_assets }}</h2>
+                    </div>
+                    <i class="bi bi-person-check fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-pie-chart"></i> Warranty Status</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center g-3">
+                    <div class="col-4">
+                        <div class="p-3 bg-danger bg-opacity-10 rounded">
+                            <h3 class="text-danger fw-bold">{{ warranty_expired }}</h3>
+                            <small class="text-muted">Expired</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-warning bg-opacity-10 rounded">
+                            <h3 class="text-warning fw-bold">{{ warranty_critical }}</h3>
+                            <small class="text-muted">&lt; 30 Days</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-success bg-opacity-10 rounded">
+                            <h3 class="text-success fw-bold">{{ warranty_warning }}</h3>
+                            <small class="text-muted">&lt; 90 Days</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-bar-chart"></i> Asset by Category</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-building"></i> Asset by Department</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="departmentChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-shop"></i> Asset by Vendor</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="vendorChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const catNames = {{ cat_names | tojson | safe }};
+const catCounts = {{ cat_counts | tojson | safe }};
+const deptNames = {{ dept_names | tojson | safe }};
+const deptCounts = {{ dept_counts | tojson | safe }};
+const vendorNames = {{ vendor_names | tojson | safe }};
+const vendorCounts = {{ vendor_counts | tojson | safe }};
+
+new Chart(document.getElementById('categoryChart'), {
+    type: 'doughnut',
+    data: {
+        labels: catNames,
+        datasets: [{
+            data: catCounts,
+            backgroundColor: ['#0d6efd','#dc3545','#198754','#ffc107','#0dcaf0','#6f42c1','#fd7e14','#20c997']
+        }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } } }
+});
+
+new Chart(document.getElementById('departmentChart'), {
+    type: 'bar',
+    data: {
+        labels: deptNames,
+        datasets: [{
+            label: 'Assets',
+            data: deptCounts,
+            backgroundColor: '#0d6efd',
+            borderRadius: 4
+        }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+});
+
+new Chart(document.getElementById('vendorChart'), {
+    type: 'bar',
+    data: {
+        labels: vendorNames,
+        datasets: [{
+            label: 'Assets',
+            data: vendorCounts,
+            backgroundColor: '#198754',
+            borderRadius: 4
+        }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+});
+</script>
+{% endblock %}

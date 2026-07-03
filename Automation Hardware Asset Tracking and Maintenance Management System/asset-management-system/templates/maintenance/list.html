@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Maintenance{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0"><i class="bi bi-tools"></i> Maintenance Records</h4>
+    <a href="{{ url_for('assets.export_maintenance') }}" class="btn btn-success btn-sm">
+        <i class="bi bi-download"></i> Export Report
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2">
+            <div class="col-auto">
+                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="Scheduled" {{ 'selected' if status_filter == 'Scheduled' }}>Scheduled</option>
+                    <option value="Completed" {{ 'selected' if status_filter == 'Completed' }}>Completed</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Asset Tag</th>
+                    <th>Device Name</th>
+                    <th>Engineer</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{ r.maintenance_date.strftime('%d-%m-%Y') }}</td>
+                    <td><span class="badge bg-secondary">{{ r.asset.asset_tag if r.asset else 'N/A' }}</span></td>
+                    <td>
+                        {% if r.asset %}
+                        <a href="{{ url_for('assets.detail_asset', asset_id=r.asset_id) }}" class="text-decoration-none">{{ r.asset.device_name }}</a>
+                        {% else %}Deleted{% endif %}
+                    </td>
+                    <td>{{ r.engineer }}</td>
+                    <td class="text-truncate" style="max-width:250px">{{ r.description }}</td>
+                    <td><span class="badge bg-{{ 'success' if r.status == 'Completed' else 'warning' }}">{{ r.status }}</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        <i class="bi bi-tools fs-2 d-block mb-2"></i>
+                        No maintenance records found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if pagination.pages > 1 %}
+    <div class="card-footer bg-white">
+        <nav>
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                        <li class="page-item {{ 'active' if page_num == pagination.page }}">
+                            <a class="page-link" href="{{ url_for('maintenance.list_maintenance', page=page_num, status=status_filter) }}">{{ page_num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

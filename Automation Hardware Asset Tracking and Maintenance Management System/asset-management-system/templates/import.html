@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Import Excel{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="fw-bold mb-0"><i class="bi bi-upload"></i> Import Assets from Excel</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Select Excel File (.xlsx)</label>
+                        <input type="file" name="file" class="form-control" accept=".xlsx" required>
+                        <small class="text-muted">File must contain the following columns:</small>
+                    </div>
+                    <div class="mb-3">
+                        <div class="bg-light p-3 rounded small">
+                            <strong>Required columns:</strong><br>
+                            Asset Tag, Device Name, Category, Brand, Model, Serial Number,<br>
+                            Purchase Date, Warranty Expiration, Vendor, Assigned User,<br>
+                            Department, Location, Status, Condition, Notes
+                        </div>
+                    </div>
+                    <div class="alert alert-info small">
+                        <i class="bi bi-info-circle"></i>
+                        Existing Asset Tags will be skipped. New vendors and departments will be created automatically.
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-cloud-upload"></i> Import Assets
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

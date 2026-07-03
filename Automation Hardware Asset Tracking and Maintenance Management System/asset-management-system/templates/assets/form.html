@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if asset else 'Add' }} Asset{% endblock %}
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('assets.list_assets') }}">Assets</a></li>
+        <li class="breadcrumb-item active">{{ 'Edit' if asset else 'Create' }} Asset</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="fw-bold mb-0">{{ 'Edit Asset' if asset else 'Create New Asset' }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small">Asset Tag <span class="text-danger">*</span></label>
+                            <input type="text" name="asset_tag" class="form-control form-control-sm" value="{{ asset.asset_tag if asset else '' }}" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small">Device Name <span class="text-danger">*</span></label>
+                            <input type="text" name="device_name" class="form-control form-control-sm" value="{{ asset.device_name if asset else '' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Category</label>
+                            <input type="text" name="category" class="form-control form-control-sm" value="{{ asset.category if asset else '' }}" list="catList">
+                            <datalist id="catList">
+                                <option value="Laptop"><option value="Desktop"><option value="Server">
+                                <option value="Printer"><option value="Network Device"><option value="Monitor">
+                                <option value="Tablet"><option value="Phone">
+                            </datalist>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Brand</label>
+                            <input type="text" name="brand" class="form-control form-control-sm" value="{{ asset.brand if asset else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Model</label>
+                            <input type="text" name="model" class="form-control form-control-sm" value="{{ asset.model if asset else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Serial Number</label>
+                            <input type="text" name="serial_number" class="form-control form-control-sm" value="{{ asset.serial_number if asset else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Purchase Date</label>
+                            <input type="date" name="purchase_date" class="form-control form-control-sm" value="{{ asset.purchase_date.strftime('%Y-%m-%d') if asset and asset.purchase_date else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Warranty Expiration</label>
+                            <input type="date" name="warranty_expiration" class="form-control form-control-sm" value="{{ asset.warranty_expiration.strftime('%Y-%m-%d') if asset and asset.warranty_expiration else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Vendor</label>
+                            <select name="vendor_id" class="form-select form-select-sm">
+                                <option value="">-- Select --</option>
+                                {% for v in vendors %}
+                                <option value="{{ v.id }}" {{ 'selected' if asset and asset.vendor_id == v.id }}>{{ v.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Assigned User</label>
+                            <input type="text" name="assigned_user" class="form-control form-control-sm" value="{{ asset.assigned_user if asset else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Department</label>
+                            <select name="department_id" class="form-select form-select-sm">
+                                <option value="">-- Select --</option>
+                                {% for d in departments %}
+                                <option value="{{ d.id }}" {{ 'selected' if asset and asset.department_id == d.id }}>{{ d.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Location</label>
+                            <input type="text" name="location" class="form-control form-control-sm" value="{{ asset.location if asset else '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Status</label>
+                            <select name="status" class="form-select form-select-sm">
+                                <option value="Available" {{ 'selected' if asset and asset.status == 'Available' }}>Available</option>
+                                <option value="Assigned" {{ 'selected' if asset and asset.status == 'Assigned' }}>Assigned</option>
+                                <option value="Maintenance" {{ 'selected' if asset and asset.status == 'Maintenance' }}>Maintenance</option>
+                                <option value="Retired" {{ 'selected' if asset and asset.status == 'Retired' }}>Retired</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Condition</label>
+                            <select name="condition" class="form-select form-select-sm">
+                                <option value="Good" {{ 'selected' if asset and asset.condition == 'Good' }}>Good</option>
+                                <option value="Fair" {{ 'selected' if asset and asset.condition == 'Fair' }}>Fair</option>
+                                <option value="Poor" {{ 'selected' if asset and asset.condition == 'Poor' }}>Poor</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small">Notes</label>
+                            <textarea name="notes" class="form-control form-control-sm" rows="2">{{ asset.notes if asset else '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">{{ 'Update' if asset else 'Create' }} Asset</button>
+                        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

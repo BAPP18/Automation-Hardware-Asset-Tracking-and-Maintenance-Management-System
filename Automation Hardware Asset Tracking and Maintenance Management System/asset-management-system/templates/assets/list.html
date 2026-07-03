@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Assets{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0"><i class="bi bi-laptop"></i> Asset List</h4>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('assets.export_assets') }}" class="btn btn-success btn-sm">
+            <i class="bi bi-download"></i> Export
+        </a>
+        {% if current_user.is_admin() %}
+        <a href="{{ url_for('assets.create_asset') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Add Asset
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small">Search</label>
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="Tag, Name, Serial, User, Location..." value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Status</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for s in statuses %}
+                    <option value="{{ s }}" {{ 'selected' if status_filter == s }}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Category</label>
+                <select name="category" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for c in categories %}
+                    <option value="{{ c }}" {{ 'selected' if category_filter == c }}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Department</label>
+                <select name="department" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for d in departments %}
+                    <option value="{{ d.id }}" {{ 'selected' if department_filter == d.id|string }}>{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search"></i> Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Asset Tag</th>
+                    <th>Device Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asset in assets %}
+                <tr>
+                    <td><span class="badge bg-secondary">{{ asset.asset_tag }}</span></td>
+                    <td><a href="{{ url_for('assets.detail_asset', asset_id=asset.id) }}" class="text-decoration-none fw-medium">{{ asset.device_name }}</a></td>
+                    <td>{{ asset.category }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if asset.status == 'Available' else 'primary' if asset.status == 'Assigned' else 'warning' if asset.status == 'Maintenance' else 'danger' }}">
+                            {{ asset.status }}
+                        </span>
+                    </td>
+                    <td>{{ asset.assigned_user or '-' }}</td>
+                    <td>{{ asset.department_rel.name if asset.department_rel else '-' }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ url_for('assets.detail_asset', asset_id=asset.id) }}" class="btn btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                            {% if current_user.is_admin() %}
+                            <a href="{{ url_for('assets.edit_asset', asset_id=asset.id) }}" class="btn btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                            <button type="button" class="btn btn-outline-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#deleteModal{{ asset.id }}"><i class="bi bi-trash"></i></button>
+                            {% endif %}
+                        </div>
+                        {% if current_user.is_admin() %}
+                        <div class="modal fade" id="deleteModal{{ asset.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-sm modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-body text-center py-4">
+                                        <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+                                        <p class="mt-2 mb-0">Delete asset <strong>{{ asset.asset_tag }}</strong>?</p>
+                                        <small class="text-muted">This action cannot be undone.</small>
+                                    </div>
+                                    <div class="modal-footer border-0 justify-content-center">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                        <form method="POST" action="{{ url_for('assets.delete_asset', asset_id=asset.id) }}" style="display:inline">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        No assets found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if pagination.pages > 1 %}
+    <div class="card-footer bg-white">
+        <nav>
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {{ 'active' if page_num == pagination.page }}">
+                            <a class="page-link" href="{{ url_for('assets.list_assets', page=page_num, search=search, status=status_filter, category=category_filter, department=department_filter) }}">{{ page_num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

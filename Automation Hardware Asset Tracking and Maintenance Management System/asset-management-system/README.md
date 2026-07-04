@@ -184,5 +184,4 @@ The `screenshots/` folder is where portfolio screenshots should be placed. Recom
 MIT License - see LICENSE file for details.
 
 ## Author
-
-Built as a portfolio project demonstrating full-stack development with Python Flask, database design, and enterprise IT asset management domain expertise.
+BAP

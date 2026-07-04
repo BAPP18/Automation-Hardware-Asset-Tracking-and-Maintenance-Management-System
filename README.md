@@ -153,19 +153,6 @@ asset-management-system/
         └── main.js
 ```
 
-## Screenshots
-
-The `screenshots/` folder is where portfolio screenshots should be placed. Recommended screenshots to capture:
-
-1. **Login Page** - `login.png`
-2. **Dashboard** - `dashboard.png` (with KPI cards and charts)
-3. **Asset List** - `asset-list.png` (with search/filter interface)
-4. **Asset Detail** - `asset-detail.png` (showing documents and maintenance)
-5. **Create/Edit Asset** - `asset-form.png`
-6. **Maintenance Records** - `maintenance.png`
-7. **Import Excel** - `import-excel.png`
-8. **Activity Log** - `activity-log.png`
-
 ## Future Improvements
 
 - Email notifications for warranty expiration

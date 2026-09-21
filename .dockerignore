@@ -1,0 +1,7 @@
+.git
+__pycache__
+*.py[cod]
+Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system/database/*.db
+Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system/uploads
+Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system/exports
+Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system/screenshots

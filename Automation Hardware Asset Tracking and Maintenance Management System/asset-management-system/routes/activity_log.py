@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request
 from flask_login import login_required
+from utils.decorators import admin_required
 from models.activity_log import ActivityLog
 
 activity_bp = Blueprint('activity', __name__)
@@ -7,6 +8,7 @@ activity_bp = Blueprint('activity', __name__)
 
 @activity_bp.route('/activity-log')
 @login_required
+@admin_required
 def list_activity():
     page = request.args.get('page', 1, type=int)
     per_page = 30

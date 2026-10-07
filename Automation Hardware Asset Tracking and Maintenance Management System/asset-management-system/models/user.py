@@ -14,6 +14,8 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), nullable=False, default='Engineer')
 
     def set_password(self, password):
+        if not password or len(password) < 12:
+            raise ValueError('Passwords must contain at least 12 characters.')
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):

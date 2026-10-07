@@ -1,5 +1,6 @@
-import random
-from datetime import datetime, date, timedelta
+from datetime import UTC, datetime, date, timedelta
+from secrets import SystemRandom
+from flask import current_app
 from models import db
 from models.user import User
 from models.vendor import Vendor
@@ -9,21 +10,38 @@ from models.maintenance import Maintenance
 from models.activity_log import ActivityLog
 
 
+rng = SystemRandom()
+
+
+def utcnow():
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
 def generate_dummy_data():
     if User.query.first():
         return
 
+    admin_password = current_app.config.get('DEMO_ADMIN_PASSWORD')
+    engineer_password = current_app.config.get('DEMO_ENGINEER_PASSWORD')
+    if not admin_password or not engineer_password:
+        raise RuntimeError(
+            'DEMO_ADMIN_PASSWORD and DEMO_ENGINEER_PASSWORD are required '
+            'when SEED_DEMO_DATA is enabled.'
+        )
+    if admin_password == engineer_password:
+        raise RuntimeError('Demo Admin and Engineer passwords must be different.')
+
     users_data = [
-        {'username': 'admin', 'email': 'admin@itasset.com', 'full_name': 'Admin Utama', 'role': 'Admin', 'password': 'admin123'},
-        {'username': 'engineer1', 'email': 'engineer1@itasset.com', 'full_name': 'Budi Santoso', 'role': 'Engineer', 'password': 'eng123'},
-        {'username': 'engineer2', 'email': 'engineer2@itasset.com', 'full_name': 'Siti Rahayu', 'role': 'Engineer', 'password': 'eng123'},
-        {'username': 'engineer3', 'email': 'engineer3@itasset.com', 'full_name': 'Ahmad Hidayat', 'role': 'Engineer', 'password': 'eng123'},
-        {'username': 'engineer4', 'email': 'engineer4@itasset.com', 'full_name': 'Dewi Lestari', 'role': 'Engineer', 'password': 'eng123'},
-        {'username': 'engineer5', 'email': 'engineer5@itasset.com', 'full_name': 'Rudi Hartono', 'role': 'Engineer', 'password': 'eng123'},
-        {'username': 'engineer6', 'email': 'engineer6@itasset.com', 'full_name': 'Maya Indah', 'role': 'Engineer', 'password': 'eng123'},
-        {'username': 'engineer7', 'email': 'engineer7@itasset.com', 'full_name': 'Agus Wijaya', 'role': 'Engineer', 'password': 'eng123'},
-        {'username': 'engineer8', 'email': 'engineer8@itasset.com', 'full_name': 'Rina Marlina', 'role': 'Engineer', 'password': 'eng123'},
-        {'username': 'engineer9', 'email': 'engineer9@itasset.com', 'full_name': 'Doni Prasetyo', 'role': 'Engineer', 'password': 'eng123'},
+        {'username': 'admin', 'email': 'admin@itasset.com', 'full_name': 'Admin Utama', 'role': 'Admin', 'password': admin_password},
+        {'username': 'engineer1', 'email': 'engineer1@itasset.com', 'full_name': 'Budi Santoso', 'role': 'Engineer', 'password': engineer_password},
+        {'username': 'engineer2', 'email': 'engineer2@itasset.com', 'full_name': 'Siti Rahayu', 'role': 'Engineer', 'password': engineer_password},
+        {'username': 'engineer3', 'email': 'engineer3@itasset.com', 'full_name': 'Ahmad Hidayat', 'role': 'Engineer', 'password': engineer_password},
+        {'username': 'engineer4', 'email': 'engineer4@itasset.com', 'full_name': 'Dewi Lestari', 'role': 'Engineer', 'password': engineer_password},
+        {'username': 'engineer5', 'email': 'engineer5@itasset.com', 'full_name': 'Rudi Hartono', 'role': 'Engineer', 'password': engineer_password},
+        {'username': 'engineer6', 'email': 'engineer6@itasset.com', 'full_name': 'Maya Indah', 'role': 'Engineer', 'password': engineer_password},
+        {'username': 'engineer7', 'email': 'engineer7@itasset.com', 'full_name': 'Agus Wijaya', 'role': 'Engineer', 'password': engineer_password},
+        {'username': 'engineer8', 'email': 'engineer8@itasset.com', 'full_name': 'Rina Marlina', 'role': 'Engineer', 'password': engineer_password},
+        {'username': 'engineer9', 'email': 'engineer9@itasset.com', 'full_name': 'Doni Prasetyo', 'role': 'Engineer', 'password': engineer_password},
     ]
 
     for u in users_data:
@@ -86,29 +104,29 @@ def generate_dummy_data():
     departments = Department.query.all()
 
     for i in range(1, 51):
-        category = random.choice(categories)
-        brand = random.choice(brands_by_cat.get(category, ['Generic']))
-        purchase_date = date.today() - timedelta(days=random.randint(30, 1095))
-        warranty_days = random.choice([0, 15, 45, 120, 180, 365, 730, 1095])
+        category = rng.choice(categories)
+        brand = rng.choice(brands_by_cat.get(category, ['Generic']))
+        purchase_date = date.today() - timedelta(days=rng.randint(30, 1095))
+        warranty_days = rng.choice([0, 15, 45, 120, 180, 365, 730, 1095])
         warranty_exp = purchase_date + timedelta(days=warranty_days) if warranty_days > 0 else None
-        status = random.choices(statuses, weights=[30, 40, 20, 10])[0]
-        assigned_user = random.choice(users) if status == 'Assigned' else ''
+        status = rng.choices(statuses, weights=[30, 40, 20, 10])[0]
+        assigned_user = rng.choice(users) if status == 'Assigned' else ''
 
         asset = Asset(
             asset_tag=f'IT-{datetime.now().strftime("%Y")}-{i:04d}',
             device_name=f"{brand} {category} {i}",
             category=category,
             brand=brand,
-            model=f'Model-{random.choice(["A", "B", "C", "X", "Z"])}{random.randint(100, 999)}',
-            serial_number=f'SN-{random.randint(10000000, 99999999)}',
+            model=f'Model-{rng.choice(["A", "B", "C", "X", "Z"])}{rng.randint(100, 999)}',
+            serial_number=f'SN-{rng.randint(10000000, 99999999)}',
             purchase_date=purchase_date,
             warranty_expiration=warranty_exp,
-            vendor_id=random.choice(vendors).id,
+            vendor_id=rng.choice(vendors).id,
             assigned_user=assigned_user,
-            department_id=random.choice(departments).id,
-            location=random.choice(locations),
+            department_id=rng.choice(departments).id,
+            location=rng.choice(locations),
             status=status,
-            condition=random.choice(conditions),
+            condition=rng.choice(conditions),
             notes=f'Asset #{i} - generated automatically'
         )
         db.session.add(asset)
@@ -119,12 +137,12 @@ def generate_dummy_data():
     maint_statuses = ['Scheduled', 'Completed']
 
     for i in range(20):
-        asset = random.choice(assets)
+        asset = rng.choice(assets)
         maintenance = Maintenance(
             asset_id=asset.id,
-            maintenance_date=date.today() - timedelta(days=random.randint(0, 365)),
-            engineer=random.choice(engineers).full_name,
-            description=random.choice([
+            maintenance_date=date.today() - timedelta(days=rng.randint(0, 365)),
+            engineer=rng.choice(engineers).full_name,
+            description=rng.choice([
                 'Routine check and cleaning',
                 'OS reinstallation',
                 'Hardware replacement',
@@ -136,8 +154,8 @@ def generate_dummy_data():
                 'BIOS update',
                 'Hard drive diagnostics'
             ]),
-            status=random.choice(maint_statuses),
-            created_at=datetime.utcnow() - timedelta(days=random.randint(0, 365))
+            status=rng.choice(maint_statuses),
+            created_at=utcnow() - timedelta(days=rng.randint(0, 365))
         )
         db.session.add(maintenance)
     db.session.flush()
@@ -148,7 +166,7 @@ def generate_dummy_data():
         username=admin_user.username,
         action='System Init',
         description='System initialized with dummy data',
-        timestamp=datetime.utcnow()
+        timestamp=utcnow()
     )
     db.session.add(log)
 

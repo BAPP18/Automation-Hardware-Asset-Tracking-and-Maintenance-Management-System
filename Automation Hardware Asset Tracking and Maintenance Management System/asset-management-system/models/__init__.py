@@ -9,8 +9,9 @@ from models.asset import Asset
 from models.maintenance import Maintenance
 from models.document import Document
 from models.activity_log import ActivityLog
+from models.login_attempt import LoginAttempt
 
 __all__ = [
     'db', 'User', 'Vendor', 'Department', 'Asset',
-    'Maintenance', 'Document', 'ActivityLog'
+    'Maintenance', 'Document', 'ActivityLog', 'LoginAttempt'
 ]

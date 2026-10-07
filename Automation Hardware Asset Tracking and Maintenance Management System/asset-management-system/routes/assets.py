@@ -1,5 +1,6 @@
 import json
 import os
+import tempfile
 from datetime import date, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, send_file
 from flask_login import login_required, current_user
@@ -260,18 +261,36 @@ def import_assets():
             flash('No file selected.', 'danger')
             return render_template('import.html')
 
-        if not file.filename.endswith('.xlsx'):
+        if not file.filename.lower().endswith('.xlsx'):
             flash('Please upload an .xlsx file.', 'danger')
             return render_template('import.html')
 
+        if (
+            request.content_length
+            and request.content_length > current_app.config['MAX_IMPORT_FILE_SIZE'] + 65536
+        ):
+            flash('The Excel file exceeds the import size limit.', 'danger')
+            return render_template('import.html'), 413
+
         filename = secure_filename(file.filename)
-        temp_path = os.path.join(current_app.config['UPLOAD_FOLDER'], f'_import_{filename}')
-        file.save(temp_path)
+        os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            prefix='_import_',
+            suffix='.xlsx',
+            dir=current_app.config['UPLOAD_FOLDER'],
+            delete=False,
+        ) as temp_file:
+            temp_path = temp_file.name
 
-        imported, errors = import_assets_from_excel(temp_path)
-
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+        try:
+            file.save(temp_path)
+            if os.path.getsize(temp_path) > current_app.config['MAX_IMPORT_FILE_SIZE']:
+                imported, errors = 0, ['The Excel file exceeds the import size limit.']
+            else:
+                imported, errors = import_assets_from_excel(temp_path)
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
 
         log_activity(
             current_user.id, current_user.username,

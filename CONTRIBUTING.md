@@ -10,8 +10,10 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-export SECRET_KEY="local-dev-secret"
+export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
 export SEED_DEMO_DATA=true
+export DEMO_ADMIN_PASSWORD="choose-a-unique-strong-password"
+export DEMO_ENGINEER_PASSWORD="choose-another-strong-password"
 python app.py
 ```
 

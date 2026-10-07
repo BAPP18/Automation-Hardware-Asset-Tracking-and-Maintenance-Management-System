@@ -127,7 +127,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ csp_nonce }}">
 const catNames = {{ cat_names | tojson | safe }};
 const catCounts = {{ cat_counts | tojson | safe }};
 const deptNames = {{ dept_names | tojson | safe }};

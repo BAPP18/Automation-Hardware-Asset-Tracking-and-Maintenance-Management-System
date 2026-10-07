@@ -51,9 +51,11 @@
             </li>
             <li class="nav-divider"><hr></li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('auth.logout') }}">
-                    <i class="bi bi-box-arrow-left"></i> Logout
-                </a>
+                <form method="POST" action="{{ url_for('auth.logout') }}">
+                    <button type="submit" class="nav-link border-0 bg-transparent w-100 text-start">
+                        <i class="bi bi-box-arrow-left"></i> Logout
+                    </button>
+                </form>
             </li>
         </ul>
     </div>
@@ -95,9 +97,9 @@
 </div>
 {% endif %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script>
+    <script nonce="{{ csp_nonce }}" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script nonce="{{ csp_nonce }}" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script nonce="{{ csp_nonce }}">
         document.addEventListener("DOMContentLoaded", () => {
             const token = document.querySelector('meta[name="csrf-token"]')?.content;
             if (!token) return;
@@ -112,7 +114,7 @@
             });
         });
     </script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script nonce="{{ csp_nonce }}" src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

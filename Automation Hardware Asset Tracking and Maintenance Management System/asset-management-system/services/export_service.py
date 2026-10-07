@@ -7,13 +7,26 @@ from models.asset import Asset
 from models.maintenance import Maintenance
 
 
+def sanitize_spreadsheet_cell(value):
+    """Prevent user-controlled strings from becoming spreadsheet formulas."""
+    if not isinstance(value, str) or not value:
+        return value
+    if value[0] in ('=', '+', '-', '@', '\t', '\r', '\n'):
+        return "'" + value
+    return value
+
+
+def _safe_row(row):
+    return {key: sanitize_spreadsheet_cell(value) for key, value in row.items()}
+
+
 def export_assets_excel():
     assets = Asset.query.order_by(Asset.asset_tag).all()
     data = []
     for a in assets:
         vendor_name = a.vendor_rel.name if a.vendor_rel else ''
         dept_name = a.department_rel.name if a.department_rel else ''
-        data.append({
+        data.append(_safe_row({
             'Asset Tag': a.asset_tag,
             'Device Name': a.device_name,
             'Category': a.category,
@@ -29,7 +42,7 @@ def export_assets_excel():
             'Status': a.status,
             'Condition': a.condition or '',
             'Notes': a.notes or ''
-        })
+        }))
 
     df = pd.DataFrame(data)
     export_dir = current_app.config['EXPORT_FOLDER']
@@ -44,14 +57,14 @@ def export_maintenance_excel():
     records = Maintenance.query.order_by(Maintenance.maintenance_date.desc()).all()
     data = []
     for m in records:
-        data.append({
+        data.append(_safe_row({
             'Asset Tag': m.asset.asset_tag if m.asset else '',
             'Device Name': m.asset.device_name if m.asset else '',
             'Date': m.maintenance_date.strftime('%Y-%m-%d') if m.maintenance_date else '',
             'Engineer': m.engineer,
             'Description': m.description,
             'Status': m.status
-        })
+        }))
 
     df = pd.DataFrame(data)
     export_dir = current_app.config['EXPORT_FOLDER']

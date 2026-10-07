@@ -14,7 +14,7 @@ def get_file_info(file_path, file_type):
 
     if file_type == 'pdf':
         try:
-            from PyPDF2 import PdfReader
+            from pypdf import PdfReader
             reader = PdfReader(file_path)
             info['page_count'] = len(reader.pages)
         except Exception:

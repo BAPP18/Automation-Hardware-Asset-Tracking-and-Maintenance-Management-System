@@ -6,7 +6,7 @@ services:
     region: oregon
     rootDir: Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn --workers 1 --threads 2 --timeout 180 'app:create_app()' --bind 0.0.0.0:$PORT"
+    startCommand: "gunicorn --config gunicorn.conf.py --workers 1 --threads 2 --timeout 180 'app:create_app()' --bind 0.0.0.0:$PORT"
     healthCheckPath: /health
     envVars:
       - key: APP_ENV

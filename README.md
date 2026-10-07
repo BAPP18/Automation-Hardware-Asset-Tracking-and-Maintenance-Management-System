@@ -96,9 +96,12 @@ For deeper design details, see [System Architecture](docs/ARCHITECTURE.md).
 
 ### Governance
 - Flask-Login authentication;
+- persistent login throttling and temporary lockout;
 - Admin / Engineer roles;
 - CSRF protection for POST actions;
-- HTTP-only and SameSite session cookies;
+- HTTP-only, SameSite, and production Secure session cookies;
+- CSP, anti-framing, MIME-sniffing, referrer, permissions, and HSTS headers;
+- spreadsheet formula-injection protection and bounded Excel imports;
 - Admin-only activity audit log;
 - activity tracking for key operations.
 
@@ -126,7 +129,7 @@ For deeper design details, see [System Architecture](docs/ARCHITECTURE.md).
 | Frontend | Jinja2, Bootstrap 5, JavaScript |
 | Charts | Chart.js |
 | Excel | Pandas, Openpyxl |
-| Documents | PyPDF2, python-docx, python-pptx |
+| Documents | pypdf, python-docx, python-pptx |
 | WSGI | Gunicorn |
 | Deployment | Docker / Render |
 | CI | GitHub Actions |
@@ -141,8 +144,10 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-export SECRET_KEY="local-dev-secret"
+export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
 export SEED_DEMO_DATA=true
+export DEMO_ADMIN_PASSWORD="choose-a-unique-strong-password"
+export DEMO_ENGINEER_PASSWORD="choose-another-strong-password"
 
 python app.py
 ```
@@ -150,8 +155,10 @@ python app.py
 Windows PowerShell:
 
 ```powershell
-$env:SECRET_KEY="local-dev-secret"
+$env:SECRET_KEY=(python -c "import secrets; print(secrets.token_urlsafe(48))")
 $env:SEED_DEMO_DATA="true"
+$env:DEMO_ADMIN_PASSWORD="choose-a-unique-strong-password"
+$env:DEMO_ENGINEER_PASSWORD="choose-another-strong-password"
 python app.py
 ```
 
@@ -165,14 +172,16 @@ Demo users and sample assets are created **only when**:
 SEED_DEMO_DATA=true
 ```
 
-Default local demo credentials:
+Demo usernames are fixed for local portfolio use, while passwords must be
+provided through environment variables and contain at least 12 characters:
 
-| Role | Username | Password |
+| Role | Username | Password source |
 |---|---|---|
-| Admin | admin | admin123 |
-| Engineer | engineer1 | eng123 |
+| Admin | admin | `DEMO_ADMIN_PASSWORD` |
+| Engineer | engineer1 | `DEMO_ENGINEER_PASSWORD` |
 
-Do **not** enable demo seeding on an internet-facing production deployment.
+Demo seeding defaults to disabled and the application refuses to enable it in
+production.
 
 ## Production configuration
 
@@ -186,7 +195,9 @@ SESSION_COOKIE_SECURE=true
 DATABASE_URL=<managed-database-url>
 ```
 
-The application will refuse to start in production without `SECRET_KEY`.
+The application refuses to start in production without `SECRET_KEY` or if demo
+seeding is enabled. Rotate `SECRET_KEY` and all account passwords after any
+suspected exposure.
 
 Health endpoint:
 
@@ -261,7 +272,7 @@ Recommended KPIs include:
 The current version is suitable for a portfolio/demo environment. For real enterprise deployment, the highest-priority next steps are:
 
 1. PostgreSQL + migration framework;
-2. SSO/MFA and login rate limiting;
+2. SSO/MFA and centralized throttling for horizontally scaled deployments;
 3. object storage + malware scanning for uploads;
 4. lifecycle transition service;
 5. normalized Engineer/User ownership in maintenance records;

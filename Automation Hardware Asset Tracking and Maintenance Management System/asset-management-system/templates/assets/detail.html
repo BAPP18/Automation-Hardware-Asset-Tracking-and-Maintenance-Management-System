@@ -56,9 +56,11 @@
                 </div>
                 {% endif %}
             </div>
-            {% if current_user.is_admin() %}
+            {% if current_user.role in ('Admin', 'Engineer') %}
             <div class="card-footer bg-white border-0">
-                <a href="{{ url_for('assets.edit_asset', asset_id=asset.id) }}" class="btn btn-primary btn-sm"><i class="bi bi-pencil"></i> Edit</a>
+                {% if current_user.is_admin() %}
+                <a href="{{ url_for('assets.edit_asset', asset_id=asset.id) }}" class="btn btn-primary btn-sm"><i class="bi bi-pencil"></i> Edit Asset</a>
+                {% endif %}
                 <a href="{{ url_for('maintenance.create_maintenance', asset_id=asset.id) }}" class="btn btn-warning btn-sm"><i class="bi bi-tools"></i> Add Maintenance</a>
             </div>
             {% endif %}
@@ -76,7 +78,7 @@
                             <th>Engineer</th>
                             <th>Description</th>
                             <th>Status</th>
-                            {% if current_user.is_admin() %}<th>Actions</th>{% endif %}
+                            {% if current_user.role in ('Admin', 'Engineer') %}<th>Actions</th>{% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -86,9 +88,10 @@
                             <td>{{ m.engineer }}</td>
                             <td class="text-truncate" style="max-width:200px">{{ m.description }}</td>
                             <td><span class="badge bg-{{ 'success' if m.status == 'Completed' else 'warning' }}">{{ m.status }}</span></td>
-                            {% if current_user.is_admin() %}
+                            {% if current_user.role in ('Admin', 'Engineer') %}
                             <td>
                                 <a href="{{ url_for('maintenance.edit_maintenance', maint_id=m.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                                {% if current_user.is_admin() %}
                                 <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delMaint{{ m.id }}"><i class="bi bi-trash"></i></button>
                                 <div class="modal fade" id="delMaint{{ m.id }}" tabindex="-1">
                                     <div class="modal-dialog modal-sm modal-dialog-centered">
@@ -105,6 +108,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                {% endif %}
                             </td>
                             {% endif %}
                         </tr>

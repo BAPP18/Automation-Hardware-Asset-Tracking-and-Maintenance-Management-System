@@ -8,7 +8,7 @@ from models import db
 from models.maintenance import Maintenance
 from models.asset import Asset
 from utils.helpers import log_activity
-from utils.decorators import admin_required
+from utils.decorators import admin_required, engineer_required
 
 maintenance_bp = Blueprint('maintenance', __name__)
 
@@ -39,7 +39,7 @@ def list_maintenance():
 
 @maintenance_bp.route('/assets/<int:asset_id>/maintenance/create', methods=['GET', 'POST'])
 @login_required
-@admin_required
+@engineer_required
 def create_maintenance(asset_id):
     asset = Asset.query.get_or_404(asset_id)
 
@@ -87,7 +87,7 @@ def create_maintenance(asset_id):
 
 @maintenance_bp.route('/maintenance/<int:maint_id>/edit', methods=['GET', 'POST'])
 @login_required
-@admin_required
+@engineer_required
 def edit_maintenance(maint_id):
     record = Maintenance.query.get_or_404(maint_id)
     asset = Asset.query.get(record.asset_id)

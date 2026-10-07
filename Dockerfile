@@ -8,11 +8,11 @@ WORKDIR /app
 
 RUN useradd --create-home --shell /usr/sbin/nologin appuser
 
-COPY "Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system/requirements.txt" .
+COPY ["Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system/requirements.txt", "./requirements.txt"]
 RUN python -m pip install --upgrade pip \
     && pip install -r requirements.txt
 
-COPY "Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system/" .
+COPY ["Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system/", "./"]
 
 RUN mkdir -p /app/database /app/uploads /app/exports \
     && chown -R appuser:appuser /app

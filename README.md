@@ -1,178 +1,308 @@
-# IT Asset Tracker & Document Management System
+# IT Asset Tracking & Maintenance Management System
 
-A comprehensive web-based application for managing IT assets, maintenance records, and documents. Built with Python Flask and Bootstrap 5, designed for IT departments to track hardware assets throughout their lifecycle.
+![CI](https://github.com/BAPP18/Automation-Hardware-Asset-Tracking-and-Maintenance-Management-System/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Flask](https://img.shields.io/badge/Flask-3.x-black)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Project Overview
+A portfolio-grade Flask application for tracking hardware assets, ownership, warranty status, maintenance activity, supporting documents, and operational audit history.
 
-This system enables organizations to:
+The project is designed around a realistic IT operations workflow: **register → assign → maintain → review → retire**, with role-based access and reporting.
 
-- Track IT assets from procurement to retirement
-- Manage maintenance schedules and history
-- Store and organize asset-related documents
-- Import/export asset data via Excel
-- Monitor warranty status across the organization
-- Log all user activities for audit purposes
+## Demo
 
-Built with enterprise-grade architecture while remaining lightweight enough for small to medium IT teams.
+### Dashboard
+
+![Dashboard](Automation%20Hardware%20Asset%20Tracking%20and%20Maintenance%20Management%20System/asset-management-system/screenshots/dashboard.png)
+
+### Maintenance records
+
+![Maintenance](Automation%20Hardware%20Asset%20Tracking%20and%20Maintenance%20Management%20System/asset-management-system/screenshots/maintenance-records.png)
+
+### Asset list
+
+![Asset List](Automation%20Hardware%20Asset%20Tracking%20and%20Maintenance%20Management%20System/asset-management-system/screenshots/asset-list.png)
+
+## What problem does this solve?
+
+IT operations teams often maintain hardware inventory, assignment, warranty, and maintenance information across multiple spreadsheets. This project consolidates those workflows into one application with auditability.
+
+Key use cases:
+
+- maintain a centralized hardware asset register;
+- track assignment, department, location, and lifecycle status;
+- identify warranty risk;
+- schedule and record maintenance;
+- attach supporting documents;
+- import/export operational data through Excel;
+- separate Admin and Engineer responsibilities;
+- retain activity history for governance and review.
+
+## System flow
+
+```mermaid
+flowchart LR
+    A[Procure / Register] --> B[Available]
+    B --> C[Assigned]
+    B --> D[Maintenance]
+    C --> D
+    D --> B
+    D --> C
+    B --> E[Retired]
+    C --> E
+    D --> E
+
+    C --> F[Warranty Monitoring]
+    D --> G[Maintenance History]
+    B --> H[Documents]
+    C --> H
+    D --> H
+
+    F --> I[Dashboard / Reports]
+    G --> I
+    H --> I
+```
+
+For deeper design details, see [System Architecture](docs/ARCHITECTURE.md).
 
 ## Features
 
-### Asset Management
-- Full CRUD operations for IT assets
-- 15+ fields per asset including vendor, department, warranty, and assignment tracking
-- Status tracking: Available, Assigned, Maintenance, Retired
-- Advanced search and filtering by tag, name, serial number, vendor, department, and status
+### Asset management
+- create, view, edit, and retire hardware assets;
+- asset tag and serial-number tracking;
+- category, brand, model, vendor, department, assignment, location, status, and condition;
+- search, filtering, pagination;
+- Excel import/export.
 
-### Dashboard & Analytics
-- KPI cards: Total Assets, Active Assets, Maintenance Due, Assigned Assets
-- Warranty status visualization with color-coded indicators (Red/Yellow/Green)
-- Interactive charts: Assets by Category, Department, and Vendor (using Chart.js)
+### Maintenance management
+- schedule maintenance per asset;
+- Engineer and Admin maintenance access;
+- edit maintenance progress;
+- maintenance history per asset;
+- report export;
+- overdue maintenance KPI.
 
-### Document Management
-- Upload documents per asset (PDF, DOCX, PPTX, XLSX, TXT)
-- Automatic file information extraction (page count, paragraphs, slides, etc.)
-- Download and delete documents
+### Warranty & dashboard
+- total / active / assigned / retired asset KPIs;
+- expired / critical / warning warranty bands;
+- category, department, and vendor distribution;
+- maintenance-due visibility.
 
-### Maintenance Tracking
-- Record and track maintenance activities per asset
-- Status: Scheduled / Completed
-- Engineer assignment and description logging
+### Document management
+- PDF, DOCX, PPTX, XLSX, and TXT uploads;
+- file metadata extraction;
+- download/delete control;
+- 50 MB request limit by default.
 
-### Excel Integration
-- Import assets from .xlsx files with automatic vendor/department creation
-- Export asset lists and maintenance reports to Excel
+### Governance
+- Flask-Login authentication;
+- Admin / Engineer roles;
+- CSRF protection for POST actions;
+- HTTP-only and SameSite session cookies;
+- Admin-only activity audit log;
+- activity tracking for key operations.
 
-### Security & Access Control
-- Role-based access: Admin (full access) and Engineer (read + maintenance)
-- Session management with Flask-Login
-- Complete activity audit log
+## Role model
 
-## Technology Stack
+| Capability | Admin | Engineer |
+|---|:---:|:---:|
+| View dashboard/assets | ✓ | ✓ |
+| Export reports | ✓ | ✓ |
+| Create/edit asset master | ✓ | — |
+| Upload/delete documents | ✓ | — |
+| Create/edit maintenance | ✓ | ✓ |
+| Delete maintenance | ✓ | — |
+| View audit log | ✓ | — |
 
-| Component | Technology |
-|-----------|-----------|
-| Backend | Python, Flask |
-| ORM | SQLAlchemy |
-| Database | SQLite |
-| Frontend | HTML5, Bootstrap 5, JavaScript |
+## Tech stack
+
+| Area | Technology |
+|---|---|
+| Backend | Python 3.11, Flask |
+| ORM | Flask-SQLAlchemy / SQLAlchemy |
+| Authentication | Flask-Login |
+| CSRF | Flask-WTF |
+| Database | SQLite by default; `DATABASE_URL` supported |
+| Frontend | Jinja2, Bootstrap 5, JavaScript |
 | Charts | Chart.js |
 | Excel | Pandas, Openpyxl |
 | Documents | PyPDF2, python-docx, python-pptx |
-| Auth | Flask-Login, Werkzeug |
+| WSGI | Gunicorn |
+| Deployment | Docker / Render |
+| CI | GitHub Actions |
 
-## Installation
-
-### Prerequisites
-
-- Python 3.9+
-- pip (Python package installer)
-
-### Setup
+## Quick start
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/asset-management-system.git
-cd asset-management-system
+git clone https://github.com/BAPP18/Automation-Hardware-Asset-Tracking-and-Maintenance-Management-System.git
+cd "Automation-Hardware-Asset-Tracking-and-Maintenance-Management-System/Automation Hardware Asset Tracking and Maintenance Management System/asset-management-system"
 
-# Install dependencies
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 
-# Run the application
+export SECRET_KEY="local-dev-secret"
+export SEED_DEMO_DATA=true
+
 python app.py
 ```
 
-The application will:
-1. Create the SQLite database automatically
-2. Generate dummy data (50 assets, 8 vendors, 5 departments, etc.)
-3. Start the development server at `http://127.0.0.1:5000`
+Windows PowerShell:
 
-### Default Login Credentials
+```powershell
+$env:SECRET_KEY="local-dev-secret"
+$env:SEED_DEMO_DATA="true"
+python app.py
+```
+
+Open: `http://127.0.0.1:5000`
+
+## Demo data
+
+Demo users and sample assets are created **only when**:
+
+```text
+SEED_DEMO_DATA=true
+```
+
+Default local demo credentials:
 
 | Role | Username | Password |
-|------|----------|----------|
+|---|---|---|
 | Admin | admin | admin123 |
 | Engineer | engineer1 | eng123 |
 
-## Folder Structure
+Do **not** enable demo seeding on an internet-facing production deployment.
 
-```
-asset-management-system/
-├── app.py                  # Application entry point
-├── config.py               # Configuration settings
-├── requirements.txt        # Python dependencies
-├── README.md               # This file
-├── database/               # SQLite database file
-├── uploads/                # Uploaded documents
-├── exports/                # Generated Excel exports
-├── screenshots/            # Screenshots for portfolio
-├── models/                 # SQLAlchemy ORM models
-│   ├── __init__.py
-│   ├── user.py
-│   ├── vendor.py
-│   ├── department.py
-│   ├── asset.py
-│   ├── maintenance.py
-│   ├── document.py
-│   └── activity_log.py
-├── routes/                 # Flask blueprints
-│   ├── __init__.py
-│   ├── auth.py
-│   ├── dashboard.py
-│   ├── assets.py
-│   ├── documents.py
-│   ├── maintenance.py
-│   └── activity_log.py
-├── services/               # Business logic
-│   ├── __init__.py
-│   ├── import_service.py
-│   ├── export_service.py
-│   ├── file_service.py
-│   └── dummy_data.py
-├── utils/                  # Utility functions
-│   ├── __init__.py
-│   ├── helpers.py
-│   └── decorators.py
-├── templates/              # Jinja2 templates
-│   ├── base.html
-│   ├── login.html
-│   ├── dashboard.html
-│   ├── import.html
-│   ├── activity_log.html
-│   ├── assets/
-│   │   ├── list.html
-│   │   ├── detail.html
-│   │   └── form.html
-│   ├── maintenance/
-│   │   ├── list.html
-│   │   └── form.html
-│   └── documents/
-└── static/                 # Static assets
-    ├── css/
-    │   └── style.css
-    └── js/
-        └── main.js
+## Production configuration
+
+Recommended minimum environment:
+
+```text
+APP_ENV=production
+SECRET_KEY=<strong-random-secret>
+SEED_DEMO_DATA=false
+SESSION_COOKIE_SECURE=true
+DATABASE_URL=<managed-database-url>
 ```
 
-## Future Improvements
+The application will refuse to start in production without `SECRET_KEY`.
 
-- Email notifications for warranty expiration
-- QR Code generation for asset labels
-- REST API for third-party integration
-- LDAP/SSO authentication
-- Advanced reporting engine
-- Asset depreciation calculation
-- Mobile-responsive PWA support
-- Multi-language support (i18n)
-- Cloud storage integration (S3, Google Drive)
-- Barcode scanning via mobile camera
+Health endpoint:
+
+```text
+GET /health
+```
+
+## Testing
+
+```bash
+python -m compileall -q .
+python -m unittest discover -s tests -v
+```
+
+GitHub Actions automatically runs smoke tests and validates the Docker image.
+
+## Repository structure
+
+```text
+.
+├── .github/workflows/ci.yml
+├── .env.example
+├── Dockerfile
+├── render.yaml
+├── SECURITY.md
+├── CONTRIBUTING.md
+├── docs/
+│   ├── ARCHITECTURE.md
+│   └── PROJECT_MANAGEMENT.md
+└── Automation Hardware Asset Tracking and Maintenance Management System/
+    └── asset-management-system/
+        ├── app.py
+        ├── config.py
+        ├── models/
+        ├── routes/
+        ├── services/
+        ├── utils/
+        ├── templates/
+        ├── static/
+        ├── screenshots/
+        └── tests/
+```
+
+> The long nested application path is retained for backward compatibility with the existing deployment setup. Flattening it into a simpler `src/` or app-root structure is recommended as a future refactor.
+
+## Project management view
+
+This repository is also documented as an IT operations improvement project, not just a coding exercise.
+
+See [Project Management Framework](docs/PROJECT_MANAGEMENT.md) for:
+
+- business objectives;
+- scope / out-of-scope;
+- WBS;
+- RACI;
+- operational KPIs;
+- risk register;
+- phased roadmap.
+
+Recommended KPIs include:
+
+- asset data completeness;
+- maintenance on-time rate;
+- overdue maintenance volume;
+- warranty-at-risk coverage;
+- assignment accuracy;
+- audit coverage;
+- Excel import error rate.
+
+## Current engineering limitations
+
+The current version is suitable for a portfolio/demo environment. For real enterprise deployment, the highest-priority next steps are:
+
+1. PostgreSQL + migration framework;
+2. SSO/MFA and login rate limiting;
+3. object storage + malware scanning for uploads;
+4. lifecycle transition service;
+5. normalized Engineer/User ownership in maintenance records;
+6. background scheduler for warranty/maintenance reminders;
+7. structured observability and backup/restore procedures;
+8. REST API and integration layer.
+
+## Roadmap
+
+```mermaid
+flowchart LR
+    P1[Phase 1\nPortfolio Hardening] --> P2[Phase 2\nOperations Maturity]
+    P2 --> P3[Phase 3\nEnterprise Readiness]
+    P3 --> P4[Phase 4\nAutomation]
+
+    P1 --> C1[CI / Tests / Security]
+    P2 --> C2[SLA / Lifecycle / Notifications]
+    P3 --> C3[PostgreSQL / SSO / Storage]
+    P4 --> C4[QR / API / Reconciliation]
+```
+
+## Security
+
+See [SECURITY.md](SECURITY.md). Generated databases, credentials, environment files, logs, uploads, and exports should not be committed.
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License — see [LICENSE](LICENSE).
 
-## Author
+## Portfolio intent
 
-Built as a portfolio project demonstrating full-stack development with Python Flask, database design, and enterprise IT asset management domain expertise.
+This project demonstrates:
 
-
-
+- full-stack Flask development;
+- database modeling;
+- RBAC;
+- secure configuration;
+- file and Excel workflows;
+- IT asset lifecycle management;
+- maintenance operations;
+- auditability;
+- Docker/cloud deployment;
+- CI/testing;
+- software-engineering and project-management documentation.
